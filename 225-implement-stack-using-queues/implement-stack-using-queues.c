@@ -1,50 +1,71 @@
 typedef struct {
-    int queue[100];
-    int front;
-    int rear;
-    int size;
+    int q1[100];
+    int front1;
+    int rear1;
+    int size1;
+    
+    int q2[100];
+    int front2;
+    int rear2;
+    int size2;
 } MyStack;
 
 
 MyStack* myStackCreate() {
     MyStack* obj = (MyStack*)malloc(sizeof(MyStack));
-    obj->front = 0;
-    obj->rear = 0;
-    obj->size = 0;
+    obj->front1 = 0; 
+    obj->rear1 = 0; 
+    obj->size1 = 0;
+    
+    obj->front2 = 0; 
+    obj->rear2 = 0; 
+    obj->size2 = 0;
+    
     return obj;
 }
 
 void myStackPush(MyStack* obj, int x) {
-    // Enqueue the new element to the back
-    obj->queue[obj->rear] = x;
-    obj->rear = (obj->rear + 1) % 100;
-    obj->size++;
+    // 1. Enqueue the new element to the empty temporary queue (q2)
+    obj->q2[obj->rear2] = x;
+    obj->rear2 = (obj->rear2 + 1) % 100;
+    obj->size2++;
 
-    // Rotate the queue to bring the newly added element to the front
-    for (int i = 0; i < obj->size - 1; i++) {
-        // Dequeue from front
-        int temp = obj->queue[obj->front];
-        obj->front = (obj->front + 1) % 100;
-        
-        // Enqueue to the back
-        obj->queue[obj->rear] = temp;
-        obj->rear = (obj->rear + 1) % 100;
+    // 2. Dequeue all elements from the main queue (q1) and enqueue them to q2
+    while (obj->size1 > 0) {
+        int temp = obj->q1[obj->front1];
+        obj->front1 = (obj->front1 + 1) % 100;
+        obj->size1--;
+
+        obj->q2[obj->rear2] = temp;
+        obj->rear2 = (obj->rear2 + 1) % 100;
+        obj->size2++;
+    }
+
+    // 3. Move everything from q2 back into q1 so q1 remains the main storage
+    while (obj->size2 > 0) {
+        int temp = obj->q2[obj->front2];
+        obj->front2 = (obj->front2 + 1) % 100;
+        obj->size2--;
+
+        obj->q1[obj->rear1] = temp;
+        obj->rear1 = (obj->rear1 + 1) % 100;
+        obj->size1++;
     }
 }
 
 int myStackPop(MyStack* obj) {
-    int topElement = obj->queue[obj->front];
-    obj->front = (obj->front + 1) % 100;
-    obj->size--;
+    int topElement = obj->q1[obj->front1];
+    obj->front1 = (obj->front1 + 1) % 100;
+    obj->size1--;
     return topElement;
 }
 
 int myStackTop(MyStack* obj) {
-    return obj->queue[obj->front];
+    return obj->q1[obj->front1];
 }
 
 bool myStackEmpty(MyStack* obj) {
-    return obj->size == 0;
+    return obj->size1 == 0;
 }
 
 void myStackFree(MyStack* obj) {
